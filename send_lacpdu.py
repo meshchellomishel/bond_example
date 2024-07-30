@@ -1,51 +1,132 @@
-#!/usr/bin/python3.10
+#!/usr/bin/python3
 
 
+from time import *
 from scapy.all import *
 from scapy.layers.inet import Ether, Dot3
 from scapy.contrib.lacp import SlowProtocol, LACP
 import socket
 
 
-LACP_ACTIVITY = 0x01
-LACP_TIMEOUT = 0x02
-LACP_AGGREGATION = 0x04
-LACP_SYNCHRONYZATION = 0x08
-LACP_COLLECTING = 0x16
-LACP_DISTRIBUTING = 0x32
-LACP_DEFAULTED = 0x64
-LACP_EXPIRED = 0x128
+LACP_ACTIVITY = 1
+LACP_TIMEOUT = 2
+LACP_AGGREGATION = 4
+LACP_SYNCHRONYZATION = 8
+LACP_COLLECTING = 16
+LACP_DISTRIBUTING = 32
+LACP_DEFAULTED = 64
+LACP_EXPIRED = 128
 
 LACP_DEFAULT_ACTOR_STATE = LACP_ACTIVITY | LACP_AGGREGATION | LACP_SYNCHRONYZATION | LACP_DEFAULTED
 
 
-class Lacp_obj():
-    def __init__(self):
-        self.ac_sys_prio = 1
-        self.ac_sys_mac = '70:85:c2:b3:c7:26'
-        self.ac_port_key = 1
-        self.ac_port_prio = 1
-        self.ac_port_num = 4
-        self.ac_state = LACP_DEFAULT_ACTOR_STATE
-
-        self.pt_sys_prio = 65535
-        self.pt_sys_mac = '00:00:00:00:00:00'
-        self.pt_port_key = 1
-        self.pt_port_prio = 255
-        self.pt_port_num = 1
-        self.pt_state = LACP_ACTIVITY
+def send_lacp(lacp):
+    pkt = (Ether() / SlowProtocol() / lacp)
+    sendp(pkt, 'enp30s0', 1)
 
 
-def build_pkt():
-    pkt = (Ether(src='70:85:c2:b3:c7:26', dst='00:00:00:00:00:00')
-            / SlowProtocol() / LACP(actor_system_priority=1, actor_system='70:85:c2:b3:c7:26',
-                                    actor_key=1, actor_port_priority=1, actor_port_number=4,
-                                    actor_state=LACP_DEFAULT_ACTOR_STATE))
-    return pkt
+def slep():
+    sleep(5)
+
+
+def next_test(msg):
+    slep()
+    print("[TEST]: ", msg)
+
+
+def partner_settings_test():
+    next_test("--- system ID test")
+    lacp = LACP(actor_system_priority=999, actor_system='99:99:99:b3:c7:26',
+                                    actor_key=999, actor_port_priority=999, actor_port_number=999,
+                                    actor_state=LACP_DEFAULT_ACTOR_STATE)
+    send_lacp(lacp)
+
+    slep()
+    lacp = LACP(actor_system_priority=999, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=999, actor_port_priority=999, actor_port_number=999,
+                                    actor_state=LACP_DEFAULT_ACTOR_STATE)
+    send_lacp(lacp)
+
+    next_test("--- system priority test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=999, actor_port_priority=999, actor_port_number=999,
+                                    actor_state=LACP_DEFAULT_ACTOR_STATE)
+    send_lacp(lacp)
+
+    next_test("--- key test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=999, actor_port_number=999,
+                                    actor_state=LACP_DEFAULT_ACTOR_STATE)
+    send_lacp(lacp)
+
+    next_test("--- port priority test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=1, actor_port_number=999,
+                                    actor_state=LACP_DEFAULT_ACTOR_STATE)
+    send_lacp(lacp)
+
+    next_test("--- port nuber test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=1, actor_port_number=1,
+                                    actor_state=LACP_DEFAULT_ACTOR_STATE)
+    send_lacp(lacp)
+
+
+def partner_states_test():
+    next_test("--- activity test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=1, actor_port_number=1,
+                                    actor_state=LACP_ACTIVITY)
+    send_lacp(lacp)
+
+    next_test("--- timeout test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=1, actor_port_number=1,
+                                    actor_state=LACP_TIMEOUT)
+    send_lacp(lacp)
+
+    next_test("--- aggregation test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=1, actor_port_number=1,
+                                    actor_state=LACP_AGGREGATION)
+    send_lacp(lacp)
+
+    next_test("--- synchronization test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=1, actor_port_number=1,
+                                    actor_state=LACP_SYNCHRONYZATION)
+    send_lacp(lacp)
+
+    next_test("--- collecting test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=1, actor_port_number=1,
+                                    actor_state=LACP_COLLECTING)
+    send_lacp(lacp)
+
+    next_test("--- distributing test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=1, actor_port_number=1,
+                                    actor_state=LACP_DISTRIBUTING)
+    send_lacp(lacp)
+
+    next_test("--- expired test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=1, actor_port_number=1,
+                                    actor_state=LACP_EXPIRED)
+    send_lacp(lacp)
+
+    next_test("--- defaulted test")
+    lacp = LACP(actor_system_priority=1, actor_system='11:11:11:b3:c7:26',
+                                    actor_key=1, actor_port_priority=1, actor_port_number=1,
+                                    actor_state=LACP_DEFAULTED)
+    send_lacp(lacp)
 
 
 def main():
-    sendp(build_pkt, 'eth11', 4)
+    print("[SETTINGS test]")
+    partner_settings_test()
+    print("[STATE test]")
+    partner_states_test()
 
 
 main()
